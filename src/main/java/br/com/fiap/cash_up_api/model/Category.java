@@ -26,5 +26,18 @@ public class Category {
         return icon;
     }
 
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return id + " - " + name +" - " + icon;
+    }
+
     
 }
