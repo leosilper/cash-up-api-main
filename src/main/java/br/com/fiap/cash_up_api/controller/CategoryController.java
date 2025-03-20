@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,15 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import br.com.fiap.cash_up_api.model.Category;
-import br.com.fiap.cash_up_api.repository.CategoryRepository;
+import br.com.fiap.cash_up_api.repository.JpaCategoryRepository;
 
 @RestController // component
-@RequestMapping("/categories")
+@RequestMapping("/categories") // para não gerar repetição no url
+
 public class CategoryController {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired // injeção de dependência
-    private CategoryRepository repository;
+    private JpaCategoryRepository repository;
 
     // listar todas as categorias
     // GET :8080/categories -> json
@@ -38,39 +38,37 @@ public class CategoryController {
     }
 
     // cadastrar categorias
-    @PostMapping("/categories")
-
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     // @ResponseStatus(code = HttpStatus.CREATED)
-    public ResponseEntity<Category> create(@RequestBody Category category) {
+    public Category create(@RequestBody Category category) {
         log.info("Cadastrando categoria " + category.getName());
         return repository.save(category);
     }
 
     // retornar uma categoria
-    @GetMapping("{id}")
-    public ResponseEntity<Category> get(@PathVariable Long id){
+    @GetMapping("/{id}")
+    public Category get(@PathVariable Long id) {
         log.info("Buscando categoria " + id);
-        return getCategory(id));
+        return (getCategory(id));
     }
 
     // endpoint para apagar categoria
-    @DeleteMapping("/categories/{id}")
-    public ResponseEntity<Object> destroy(@PathVariable Long id) {
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void destroy(@PathVariable Long id) {
         log.info("Apagando categoria " + id);
-        repository.delete(getCategory(id));
-        return ResponseEntity.noContent().build(); // noContenet status 204
+        repository.delete(getCategory(id));// noContenet status 204
     }
 
     // editar categorias
-    @PutMapping("/categories/{id}")
-    public ResponseEntity<Category> update(@PathVariable Long id, @RequestBody Category category) {
+    @PutMapping("/{id}")
+    public Category update(@PathVariable Long id, @RequestBody Category category) {
         log.info("Atualizando categoria " + id + " " + category);
 
         getCategory(id);
         category.setId(id); // para não alterar o Id
-        repository.save(category);
-        return ResponseEntity.ok(category);
+        return repository.save(category);
     }
 
     private Category getCategory(Long id) {
